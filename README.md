@@ -1,10 +1,15 @@
 **End-of-semester Project**
+
 Camera control on mouse.
+
 Space to make the character jump. Jump animation only works the first time, i was to tired to figure out why.
 
 html file should be in examples folder
+
 tetures are threejs default
+
 gltb file in models folder
+
 mp3 an ogg files in sounds folder
 
 *Instructions*
@@ -28,4 +33,3 @@ Contenu :
   - Fonctions, code propre
   - Commentaires
   
- 
