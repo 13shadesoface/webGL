@@ -16,7 +16,7 @@
 			import * as THREE from '../build/three.module.js';
 			import Stats from './jsm/libs/stats.module.js';
 			import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-			import { ColladaLoader } from './jsm/loaders/ColladaLoader.js';
+			//import { ColladaLoader } from './jsm/loaders/ColladaLoader.js';
 			import { OrbitControls } from './jsm/controls/OrbitControls.js';
       import { GUI } from './jsm/libs/dat.gui.module.js';
 
@@ -61,40 +61,45 @@
         var textureBrick = new THREE.TextureLoader().load( 'textures/brick_bump.jpg' );
         textureBrick.wrapS = textureBrick.wrapT = THREE.RepeatWrapping;
         textureBrick.repeat.set( 10, 10 );
+				var textureDoor = new THREE.TextureLoader().load( 'textures/brick_bump.jpg' );
+        textureDoor.wrapS = textureDoor.wrapT = THREE.RepeatWrapping;
+				textureDoor.offset.set(0,0);//the extrudeGeometry function messes with the mapping offset, this solves the problem
 				var textureGrass = new THREE.TextureLoader().load( 'textures/terrain/grasslight-big.jpg' );
 				textureGrass.receiveShadow = true;
 				textureGrass.wrapS = textureGrass.wrapT = THREE.RepeatWrapping;
-				textureGrass.repeat.set( 20, 20 );
+				textureGrass.repeat.set( 30, 30 );
         //materials
 				const materialGround = new THREE.MeshPhongMaterial( { map: textureGrass } );
         const materialWall = new THREE.MeshPhongMaterial( { map: textureBrick } );
+				const materialDoor = new THREE.MeshPhongMaterial( { map: textureDoor } );
         //geometry
 				const geometryGround = new THREE.PlaneBufferGeometry( 300, 300);
         const geometryWall = new THREE.BoxBufferGeometry(20, 20, 0.5);
 				const geometryCylinder = new THREE.CylinderBufferGeometry( 5, 5, 20, 100);
-				//2d shape with door inside
+				//simple 2d shape with door inside
 				var door = new THREE.Shape()
 					door.moveTo(-10,0);
-					door.lineTo(-10,10);
-					door.lineTo(10,10);
+					door.lineTo(-10,20);
+					door.lineTo(10,20);
 					door.lineTo(10,0);
-					door.lineTo(0.5,0);
-					door.lineTo(0.5,1);
-					door.lineTo(-0.5,1);
-					door.lineTo(-0.5,0);
+					door.lineTo(1.5,0);
+					door.lineTo(1.5,5);
+					door.lineTo(-1.5,5);
+					door.lineTo(-1.5,0);
 					door.lineTo(-10,0);
 
-				const extrudeSettings = { amount: 10, bevelSize: 1, bevelThickness: 1 };
+				const extrudeSettings = { depth: 2, bevelEnabled: false};//amount : how deep on z axis
 				const geometryDoor = new THREE.ExtrudeGeometry( door, extrudeSettings );
         //adding objects to our scene
 				ground = new THREE.Mesh( geometryGround, materialGround );
 				ground.rotation.x = - Math.PI / 2; //so the plane is horizontal
 				ground.receiveShadow = true;
 				scene.add( ground );
-				//wall
-        addObject(geometryWall,materialWall,0,10,-5);
+				//castle entrance
+        addObject(geometryDoor,materialDoor,0,0,-5);
 				addObject(geometryCylinder,materialWall,-10,10,0);
 				addObject(geometryCylinder,materialWall,10,10,0);
+
         //sound
 
         // create listener on the camera
@@ -124,7 +129,7 @@
 				const jumpSound = new THREE.Audio( listener );
 				audioLoader.load( 'sounds/jump.ogg', function( buffer ) {
 					jumpSound.setBuffer( buffer );
-					jumpSound.setVolume(0.1);
+					jumpSound.setVolume(0.1);//not playing it yet, only on space key
 				});
 
 				// collada bored knight character
@@ -148,9 +153,16 @@
 				loader.load( 'models/guard.glb', function ( gltf ) {
 					guard = gltf.scene;
 					animations = gltf.animations;
+
 					guard.scale.set(0.02,0.02,0.02);
-					guard.receiveShadow = true;
-					guard.castShadow = true;
+					guard.traverse( function ( child ) {
+						if ( child.isMesh ) {
+								child.castShadow = true;
+								child.receiveShadow = true;
+							}
+					});
+					//guard.receiveShadow = true;
+					//guard.castShadow = true;
 	        guard.position.set(0,2.1,0);
 					guard.add(whistle);//PositionalAudio
 
